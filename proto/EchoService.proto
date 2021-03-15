@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+option java_package = "com.samples.grpc";
+option java_multiple_files = true;
+option go_package = "github.com/p-indriunas/grpc-sample-go/sample";
+
+package com.samples.grpc;
+
+import "google/api/annotations.proto";
+
+service EchoService {
+  rpc echo(EchoRequest) returns (EchoResponse) {
+    option (google.api.http) = {
+      post: "/v1/example/echo"
+      body: "*"
+    };
+  }
+  rpc echoStream(EchoRequest) returns (stream EchoResponse) {}
+}
+
+message EchoRequest {
+  string echo = 1;
+  uint32 count = 2;
+}
+
+message EchoResponse {
+  string echo = 1;
+}
