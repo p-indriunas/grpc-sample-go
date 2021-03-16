@@ -19,13 +19,11 @@ import (
 // https://medium.com/swlh/rest-over-grpc-with-grpc-gateway-for-go-9584bfcbb835
 //
 
-func NewGRPCServer() *grpc.Server {
-	grpcServer := grpc.NewServer()
-
-	// Register GRPC services
+func registerGrpcHandlers(grpcServer *grpc.Server) {
 	gw.RegisterEchoServiceServer(grpcServer, services.NewEchoServiceServer())
 
-	return grpcServer
+	// Register GRPC services here
+	// ...
 }
 
 func startGrpcServer(grpcServer *grpc.Server, address string, wg *sync.WaitGroup) {
@@ -46,11 +44,6 @@ func startGrpcServer(grpcServer *grpc.Server, address string, wg *sync.WaitGroup
 	}()
 }
 
-func NewHttpServer(address string) *runtime.ServeMux {
-	mux := runtime.NewServeMux()
-	return mux
-}
-
 func startHttpServer(address string, handler http.Handler, wg *sync.WaitGroup) {
 	wg.Add(1)
 	go func() {
@@ -63,7 +56,7 @@ func startHttpServer(address string, handler http.Handler, wg *sync.WaitGroup) {
 	}()
 }
 
-func registerGatewayHandlers(ctx context.Context, grpcAddress string, mux *runtime.ServeMux) error {
+func registerHttpGatewayHandlers(ctx context.Context, grpcAddress string, mux *runtime.ServeMux) error {
 	opts := []grpc.DialOption{
 		grpc.WithInsecure(),
 	}
@@ -96,14 +89,16 @@ func main() {
 	wg := &sync.WaitGroup{}
 
 	grpcAddress := "localhost:5000"
-	grpcServer := NewGRPCServer()
+	grpcServer := grpc.NewServer()
 	startGrpcServer(grpcServer, grpcAddress, wg)
 
+	registerGrpcHandlers(grpcServer)
+
 	httpAddress := "localhost:5001"
-	httpServer := NewHttpServer(httpAddress)
+	httpServer := runtime.NewServeMux()
 	startHttpServer(httpAddress, httpGrpcRouter(grpcServer, httpServer), wg)
 
-	registerGatewayHandlers(ctx, grpcAddress, httpServer)
+	registerHttpGatewayHandlers(ctx, grpcAddress, httpServer)
 
 	wg.Wait()
 	grpcServer.GracefulStop()
