@@ -11,7 +11,7 @@ import "google/api/annotations.proto";
 service EchoService {
   rpc echo(EchoRequest) returns (EchoResponse) {
     option (google.api.http) = {
-      post: "/v1/example/echo"
+      post: "/v1/echo"
       body: "*"
     };
   }

@@ -1,30 +1,32 @@
 #!/bin/bash
 
 #
-# Based on tutorial:
+# Based on:
 # https://github.com/grpc-ecosystem/grpc-gateway#usage
 #
 
 mkdir -p ./google
 
 function download() {
-  SOURCE_URL=$1
-  TARGET_DIR=$2
+  source_url=$1
+  target_dir=$2
 
-  if [ -z $TARGET_DIR ]; then
-    TARGET_DIR="."
+  if [ -z "$target_dir" ]; then
+    target_dir="."
   fi
 
-  TARGET_FILE="${TARGET_DIR}/$(basename "$SOURCE_URL")"
-  if [ ! -f $TARGET_FILE ]; then
-    echo "Downloading ${SOURCE_URL}"
+  target_file="${target_dir}/$(basename "$source_url")"
+  if [ ! -f "$target_file" ]; then
+    echo "Downloading ${source_url}"
 
-    wget -q $SOURCE_URL -P $TARGET_DIR
-    if [ $? -ne 0 ]; then
-      echo "Download failed. Terminating."
+    wget -q "$source_url" -P $target_dir
+
+    ret=$?
+    if [ $ret -ne 0 ]; then
+      echo "Download failed."
     fi
   fi
-  return $?
+  return $ret
 }
 
 download "https://raw.githubusercontent.com/googleapis/googleapis/master/google/api/annotations.proto" ./google/api
@@ -44,6 +46,7 @@ fi
 
 mkdir -p ../gen/go
 
+# Generate GRPC service contract
 protoc -I . \
     --go_out=../gen/go \
     --go-grpc_out=require_unimplemented_servers=false:../gen/go \
@@ -51,6 +54,7 @@ protoc -I . \
     --go-grpc_opt=paths=source_relative \
     EchoService.proto
 
+# Generate GRPC gateway
 protoc -I . \
     --grpc-gateway_out ../gen/go \
     --grpc-gateway_opt logtostderr=true \
