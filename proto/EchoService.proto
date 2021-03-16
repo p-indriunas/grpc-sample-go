@@ -15,7 +15,6 @@ service EchoService {
       body: "*"
     };
   }
-  rpc echoStream(EchoRequest) returns (stream EchoResponse) {}
 }
 
 message EchoRequest {

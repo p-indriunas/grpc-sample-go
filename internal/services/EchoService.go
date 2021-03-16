@@ -17,7 +17,3 @@ func NewEchoServiceServer() grpc.EchoServiceServer {
 func (r *EchoServiceServer) Echo(ctx context.Context, request *grpc.EchoRequest) (*grpc.EchoResponse, error) {
 	return &grpc.EchoResponse{Echo: request.Echo}, nil
 }
-
-func (r *EchoServiceServer) EchoStream(request *grpc.EchoRequest, responseStream grpc.EchoService_EchoStreamServer) error {
-	return nil
-}
